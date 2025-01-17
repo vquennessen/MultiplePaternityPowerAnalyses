@@ -1,0 +1,22 @@
+Package: MultiplePaternityPowerAnalyses
+Title: Power analyses to count breeding males in populations with multiple paternity
+Version: 0.0.0.9000
+Authors@R: 
+    person("Vic", "Quennessen", 
+        email = "viquennessen@gmail.com", 
+        role = c("aut", "cre"), 
+        comment = c(ORCID = "0000-0003-3626-5089"))
+Description: This package quantifies the confidence in identifying all of the 
+    fathers (genetically contributing males) for populations with multiple 
+    paternity where it's logistically unfeasible to sample all of the offspring. 
+    The package is built such that hatchlings_to_sample() must be run to provide 
+    output that is used as input for clutches_to_sample(). Similarly, 
+    probability_id_fathers() must be run to produce output that is used as 
+    input for conditional_probabilities()
+URL: https://github.com/vquennessen/MultiplePaternityPowerAnalyses
+Imports: tidyr, stats, dplyr, ggplot2, viridisLite, grDevices, gridExtra, 
+    magrittr
+License: use_mit_license()
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
