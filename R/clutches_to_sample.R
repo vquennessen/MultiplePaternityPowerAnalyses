@@ -49,14 +49,14 @@
 #' proportion_correct_all <- output[[2]]
 #'
 #' clutches_to_sample(n_sims = 100,
-#'                 pop_size = 100,
-#'                 sample_size = 32,
-#'                 paternal_contribution_mode = 'random',
-#'                 Fprob = c(0.463, 0.318, 0.157, 0.034, 0.028),
-#'                 Mprob = c(1),
-#'                 clutches_mu = 4.95,
-#'                 clutches_sd = 2.09,
-#'                 prop_correct = proportion_correct_all)
+#'                    pop_size = 100,
+#'                    sample_size = 32,
+#'                    paternal_contribution_mode = 'random',
+#'                    Fprob = c(0.463, 0.318, 0.157, 0.034, 0.028),
+#'                    Mprob = c(1),
+#'                    clutches_mu = 4.95,
+#'                    clutches_sd = 2.09,
+#'                    prop_correct = proportion_correct_all)
 
 clutches_to_sample <- function(n_sims = 10000,
                                pop_size = 100,
