@@ -9,48 +9,47 @@ conditional_probabilities(probabilities)
 \arguments{
 \item{probabilities}{a data frame that has columns for
 
-Paternal_Contribution_Mode - vector of character values of the different
-paternal contribution modes to analyse. Default values are c('random',
-'exponential', 'dominant50', 'dominant70', 'dominant90', 'mixed_dominant').
+character values of the different paternal contribution modes to analyse.
+Default values are c('random', 'exponential', 'dominant50', 'dominant70',
+'dominant90', 'mixed_dominant').
 
-Fathers_Actual - the integer number of actual fathers for a clutch. Default
-values are from 1 to 5.
+integer numbers of actual fathers for a clutch. Default values are from
+1 to 5.
 
-Sample_Size - the integer number of hatchlings to sample from a clutch.
-Default values are 32 and 96.
+integer numbers of hatchlings to sample from a clutch. Default values are
+32 and 96.
 
-Fathers_Observed - the integer number of fathers that were identified.
+integer numbers of fathers that were observed.
 
-Probability - the numeric probability of Fathers_Observed given
-Fathers_Actual. Values must be between 0 and 1, inclusive.}
+the numeric probability of the number of fathers observed given the number
+of actual fathers. Values must be between 0 and 1, inclusive.}
 }
 \value{
 two data frames of conditional probabilities for the number of
-actual fathers (Fathers_Actual) given the number of fathers identified
-(Fathers_Observed). The first data frame has columns for
-Paternal_Contribution_Mode, Sample_Size, Fathers_Observed, Fathers_Actual,
-and a Probability column that is the new conditional probability. The second
-data frame is wider so that the conditional probability values are displayed
-by rows of Paternal_Contribution_Mode and Fathers_Observed with columns for
-Fathers_Actual.
+actual fathers given the number of fathers identified. The first data frame
+has columns for paternal contribution modes, sample sizes, the number of
+fathers observed, the number of actual fathers, and a probability column that
+is the new conditional probability. The second data frame is wider so that
+the conditional probability values are displayed by rows of paternal
+contribution mode and observed numbers of fathers with columns for actual
+numbers of fathers.
 }
 \description{
 conditional_probabilities
 }
 \examples{
-probabilities <- probability_id_fathers(hatchlings_mu = 100.58,
-                                        hatchlings_sd = 22.61,
-                                        max_fathers = 5,
-                                        n_sims = 1000,
-                                        n_sizes = c(32, 96),
-                                        Paternity_contribution_mode =
-                                                         c('random',
-                                                           'exponential',
-                                                           'dominant50',
-                                                           'dominant70',
-                                                           'dominant90',
-                                                           'mixed_dominant'),
-                                        min_clutch_size = 10)
+output <- probability_id_fathers(hatchlings_mu = 100.58,
+                                 hatchlings_sd = 22.61,
+                                 max_fathers = 5,
+                                 n_sims = 10000,
+                                 sample_sizes = c(32, 96),
+                                 paternal_contribution_modes =
+                                    c('random', 'exponential',
+                                      'dominant50', 'dominant70',
+                                      'dominant90', 'mixed_dominant'),
+                                 min_clutch_size = 10)
+
+probabilities <- output[[1]]
 
 conditional_probabilities(probabilities)
 }
