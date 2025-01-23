@@ -11,12 +11,11 @@ Description: This package quantifies the confidence in identifying all of the
     paternity where it's logistically unfeasible to sample all of the offspring. 
     The package is built such that hatchlings_to_sample() must be run to provide 
     output that is used as input for clutches_to_sample(). Similarly, 
-    probability_id_fathers() must be run to produce output that is used as 
-    input for conditional_probabilities()
+    probability_id_fathers() must be run to produce output that is used as input 
+    for conditional_probabilities(). 
 URL: https://github.com/vquennessen/MultiplePaternityPowerAnalyses
-Imports: tidyr, stats, dplyr, ggplot2, viridisLite, grDevices, gridExtra, 
-    magrittr
-License: use_mit_license()
+Imports: tidyr, stats, dplyr, ggplot2, viridisLite, magrittr
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
