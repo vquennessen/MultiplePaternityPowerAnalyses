@@ -43,11 +43,11 @@ lays in one nesting season. Default value is 4.95.}
 \item{clutches_sd}{a numeric value, the standard deviation of the number of
 clutches a mother lays in one nesting season. Default value is 2.09.}
 
-\item{proportion_correct_all}{a data frame with columns "Paternal
-Contribution Mode", "Fathers" (number of contributing fathers),
-"Sample Size" (1 - 96), "Proportion Correct" (how many simulations
-correctly identified all fathers), and "Marginal" (the marginal
-paternal contributions of the last father).}
+\item{prop_correct}{a data frame with columns "Paternal Contribution Mode",
+"Fathers" (number of contributing fathers), "Sample Size" (1 - 96),
+"Proportion Correct" (how many simulations correctly identified all
+fathers), and "Marginal" (the marginal paternal contributions of the last
+or least dominant father).}
 }
 \value{
 returns a data frame with the proportion of simulations where all
@@ -61,15 +61,16 @@ from clutches, and the paternal contribution mode.
 determine if all of the fathers that contributed were identified.
 }
 \examples{
-proportion_correct_all <- hatchlings_to_sample(
-                                       hatchlings_mu = 100.58,
-                                       hatchlings_sd = 22.61,
-                                       max_fathers = 5,
-                                       n_sims = 1000,
-                                       sample_sizes = c(32, 96),
-                                       paternal_contribution_mode = 'random')
+output <- hatchlings_to_sample(hatchlings_mu = 100.58,
+                               hatchlings_sd = 22.61,
+                               max_fathers = 5,
+                               n_sims = 100,
+                               sample_sizes = c(32, 96),
+                               paternal_contribution_mode = 'random')
 
-clutches_to_sample(n_sims = 1000,
+proportion_correct_all <- output[[2]]
+
+clutches_to_sample(n_sims = 100,
                 pop_size = 100,
                 sample_size = 32,
                 paternal_contribution_mode = 'random',
