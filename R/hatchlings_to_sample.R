@@ -32,7 +32,7 @@
 #' hatchlings_to_sample(hatchlings_mu = 100.58,
 #'                      hatchlings_sd = 22.61,
 #'                      max_fathers = 5,
-#'                      n_sims = 1000,
+#'                      n_sims = 100,
 #'                      sample_sizes = c(32, 96),
 #'                      paternal_contribution_mode = 'random')
 #'
@@ -54,7 +54,7 @@ hatchlings_to_sample <- function(hatchlings_mu = 100.58,
     {stop('hatchlings_sd must be a numeric value.')}
   if (!is.numeric(max_fathers)) {stop('max_fathers must be a numeric value.')}
   if (!is.numeric(n_sims)) {stop('n_sims must be a numeric value.')}
-  if (sum(!is.numeric(sample_sizes)) > 0 & !is.factor(sample_size))
+  if (sum(!is.numeric(sample_sizes)) > 0 & !is.factor(sample_sizes))
     {stop('sample_sizes must be numeric or factor values.')}
   if (!is.character(paternal_contribution_mode) &
       !is.factor(paternal_contribution_mode))
@@ -78,34 +78,35 @@ hatchlings_to_sample <- function(hatchlings_mu = 100.58,
 
 
   # pre-allocate data frame
-  proportion_correct <- data.frame(Paternal_Contribution_Mode = paternal_contribution_mode,
-                                   Fathers = rep(2:max_fathers, each = max(sample_sizes)),
+  proportion_correct <- data.frame(Paternal_Contribution_Mode =
+                                     paternal_contribution_mode,
+                                   Fathers = rep(2:max_fathers,
+                                                 each = max(sample_sizes)),
                                    Sample_Size = rep(c(1:max(sample_sizes)),
                                                      times = (max_fathers - 1)),
-                                   Proportion_Correct = rep(NA,
-                                                            dim = (max_fathers - 1)*(max(sample_sizes) - 1)))
+                                   Proportion_Correct = NA)
 
   # for each number of fathers that contribute to a clutch:
   for (i in 2:max_fathers) {
 
     # set contributions per father based on paternal contribution mode
     if (paternal_contribution_mode == 'dominant90') {
-      MC <- 0.90
-      contributions <- c(MC, rep((1 - MC)/(i - 1), (i - 1)))
+      FC <- 0.90
+      contributions <- c(FC, rep((1 - FC)/(i - 1), (i - 1)))
       title <- paste('Dominant (90%) paternal contribution mode', sep = '')
 
     } else if (paternal_contribution_mode == 'dominant70') {
-      MC <- 0.70
-      contributions <- c(MC, rep((1 - MC)/(i - 1), (i - 1)))
+      FC <- 0.70
+      contributions <- c(FC, rep((1 - FC)/(i - 1), (i - 1)))
       title <- paste('Dominant (70%) paternal contribution mode', sep = '')
 
     } else if (paternal_contribution_mode == 'dominant50') {
-      MC <- 0.50
-      contributions <- c(MC, rep((1 - MC)/(i - 1), (i - 1)))
+      FC <- 0.50
+      contributions <- c(FC, rep((1 - FC)/(i - 1), (i - 1)))
       title <- paste('Dominant (50%) paternal contribution mode', sep = '')
 
     } else if (paternal_contribution_mode == 'exponential') {
-      MC <- 0.5
+      FC <- 0.5
       contributions <- 0.5^c(1:(i-1))
       contributions <- c(contributions, contributions[i-1])
       title <- 'Exponential (1/2) paternal contribution mode'
@@ -116,10 +117,10 @@ hatchlings_to_sample <- function(hatchlings_mu = 100.58,
 
     } else if (paternal_contribution_mode == 'mixed_dominant') {
       doms <- sample(c(0.50, 0.70, 0.90), size = n_sims, replace = TRUE)
-      M1 <- matrix(doms, nrow = n_sims, ncol = 1)
-      M2 <- matrix(rep((1 - doms) / (i - 1), i - 1),
+      F1 <- matrix(doms, nrow = n_sims, ncol = 1)
+      F2 <- matrix(rep((1 - doms) / (i - 1), i - 1),
                    nrow = n_sims, ncol = i - 1)
-      probs <- cbind(M1, M2)
+      probs <- cbind(F1, F2)
       title <- 'Mixed dominant paternal contribution mode'
 
     }
@@ -163,6 +164,14 @@ hatchlings_to_sample <- function(hatchlings_mu = 100.58,
         # correct allocation of number of fathers?
         correct[k] <- length(unique(samples)) == i
 
+        # print progress while running
+        if ((n_sims/k) %% 10 == 0) {
+          paste(Sys.time(), ' - ', i, ' max fathers', ' - sample size ',
+                sample_sizes[j], ' - ', paternal_contribution_mode, ' - ',
+                n_sims, ' sims - ', n_sims/i*100, '% done!', sep = '')
+
+        }
+
       }
 
       # calculate index in data frame
@@ -170,7 +179,7 @@ hatchlings_to_sample <- function(hatchlings_mu = 100.58,
       # print(index) for troubleshooting
 
       # stick proportion in data frame
-      proportion_correct$Proportion_Correct[index] <- mean(correct)
+      proportion_correct[index, 4] <- mean(correct)
 
       # grab column means of probs for dominant mixed paternal contribution mode
       if (paternal_contribution_mode == 'mixed_dominant') {
@@ -178,7 +187,7 @@ hatchlings_to_sample <- function(hatchlings_mu = 100.58,
       } else { contributions2 <- contributions }
 
       # marginal contribution of last (least dominant) father
-      proportion_correct$Marginal[index] <- contributions2[i]
+      proportion_correct[index, 5] <- contributions2[i]
 
     }
 
@@ -191,9 +200,9 @@ hatchlings_to_sample <- function(hatchlings_mu = 100.58,
 
   # plot results - proportion correct
   fig1 <- ggplot2::ggplot(proportion_correct,
-                          ggplot2::aes(x = Sample_Size,
-                                       y = Proportion_Correct,
-                                       col = as.factor(Fathers))) +
+                          ggplot2::aes(x = proportion_correct[, 3],
+                                       y = proportion_correct[, 4],
+                                       col = as.factor(proportion_correct[, 2]))) +
     ggplot2::geom_hline(yintercept = 0.8, linetype = 2) +
     ggplot2::geom_path(lwd = 1) +
     ggplot2::labs(col = 'Number \n of Fathers') +
@@ -203,61 +212,15 @@ hatchlings_to_sample <- function(hatchlings_mu = 100.58,
     ggplot2::geom_vline(xintercept = c(sample_sizes), linetype = 3) +
     ggplot2::ggtitle(title)
 
-  # save plot
-  ggplot2::ggsave(plot = fig1,
-                  filename = paste(paternal_contribution_mode,
-                                   '_fig1_proportion_correct.png',
-                                   sep = ''),
-                  path = paste('~/multiple_paternity_power_analyses/figures',
-                               sep = ''),
-                  width = 6,
-                  height = 4)
-
-  # What's our confidence if we sample 32 eggs?
+  # What's our confidence if we sample our sample sizes of eggs?
   proportion_correct_samples <- proportion_correct %>%
-    dplyr::filter(Sample_Size %in% sample_sizes)
+    dplyr::filter(names(proportion_correct)[3] %in% sample_sizes)
 
+  # prettier tibble
   proportion_correct_samples_pretty <- proportion_correct_samples %>%
-    tidyr::spread(Sample_Size, Proportion_Correct)
-
-  # save confidence table
-  grDevices::png(filename = paste('output/',
-                                  paternal_contribution_mode,
-                                  '_conf_table.png',
-                                  sep = ''),
-                 width = 600,
-                 height = 300)
-
-  gridExtra::grid.table(proportion_correct_samples, rows = NULL)
-
-  grDevices::dev.off()
-
-  # save plot
-  ggplot2::ggsave(plot = fig1,
-                  filename = paste(paternal_contribution_mode,
-                                   'proportion_correct.png',
-                                   sep = ''),
-                  path = 'figures/',
-                  width = 6,
-                  height = 4)
-
-  # What's our confidence if we sample 32 eggs?
-  proportion_correct_samples <- proportion_correct %>%
-    dplyr::filter(Sample_Size %in% sample_sizes)
-
-  proportion_correct_samples_pretty <- proportion_correct_samples %>%
-    tidyr::spread(Sample_Size, Proportion_Correct)
-
-  # save confidence table
-  grDevices::png(filename = paste('output/',
-                                  paternal_contribution_mode,
-                                  '_conf_table.png',
-                                  sep = ''),
-                 width = 600,
-                 height = 300)
-
-  gridExtra::grid.table(proportion_correct_samples, rows = NULL)
-  grDevices::dev.off()
+    tidyr::pivot_wider(names_from = names(proportion_correct_samples)[3],
+                       values_from = names(proportion_correct_samples)[4],
+                       names_prefix = 'Sample Size ')
 
   # what will the code produce as output
   output <- list(fig1,

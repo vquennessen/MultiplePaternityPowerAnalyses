@@ -48,7 +48,7 @@ populations that exhibit multiple paternity.
 hatchlings_to_sample(hatchlings_mu = 100.58,
                      hatchlings_sd = 22.61,
                      max_fathers = 5,
-                     n_sims = 1000,
+                     n_sims = 100,
                      sample_sizes = c(32, 96),
                      paternal_contribution_mode = 'random')
 
