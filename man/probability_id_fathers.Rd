@@ -53,7 +53,7 @@ fathers, sample size, and paternal contribution mode.
 probability_id_fathers(hatchlings_mu = 100.58,
                        hatchlings_sd = 22.61,
                        max_fathers = 5,
-                       n_sims = 1000,
+                       n_sims = 100,
                        sample_sizes = c(32, 96),
                        paternal_contribution_modes = c('random',
                                                        'exponential',

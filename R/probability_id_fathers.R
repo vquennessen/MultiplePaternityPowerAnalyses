@@ -34,7 +34,7 @@
 #' probability_id_fathers(hatchlings_mu = 100.58,
 #'                        hatchlings_sd = 22.61,
 #'                        max_fathers = 5,
-#'                        n_sims = 1000,
+#'                        n_sims = 100,
 #'                        sample_sizes = c(32, 96),
 #'                        paternal_contribution_modes = c('random',
 #'                                                        'exponential',
@@ -49,12 +49,10 @@ probability_id_fathers <- function(hatchlings_mu = 100.58,
                                    max_fathers = 5,
                                    n_sims = 10000,
                                    sample_sizes = c(32, 96),
-                                   paternal_contribution_modes = c('random',
-                                                                   'exponential',
-                                                                   'dominant50',
-                                                                   'dominant70',
-                                                                   'dominant90',
-                                                                   'mixed_dominant'),
+                                   paternal_contribution_modes =
+                                     c('random', 'exponential', 'dominant50',
+                                       'dominant70', 'dominant90',
+                                       'mixed_dominant'),
                                    min_clutch_size = 10)
 
 {
@@ -66,11 +64,11 @@ probability_id_fathers <- function(hatchlings_mu = 100.58,
   if (!is.numeric(hatchlings_sd)) {stop('hatchlings_sd must be a numeric value.')}
   if (!is.numeric(max_fathers)) {stop('max_fathers must be a numeric value.')}
   if (!is.numeric(n_sims)) {stop('n_sims must be a numeric value.')}
-  if (sum(!is.numeric(sample_sizes)) > 0 & !is.factor(sample_size))
+  if (sum(!is.numeric(sample_sizes)) > 0 & !is.factor(sample_sizes))
     {stop('sample_sizes must be numeric or factor values.')}
-  if (!is.character(paternal_contribution_mode) &
-      !is.factor(paternal_contribution_mode))
-    {stop('paternal_contribution_mode must be a character or factor value.')}
+  if (!is.character(paternal_contribution_modes) &
+      !is.factor(paternal_contribution_modes))
+    {stop('paternal_contribution_modes must be a character or factor value.')}
   if (!is.numeric(min_clutch_size))
     {stop('min_clutch_size must be a numeric value.')}
 
@@ -233,24 +231,16 @@ probability_id_fathers <- function(hatchlings_mu = 100.58,
   # remove row of NAs at the top
   probabilities <- probabilities[-1, ]
 
-  # save object
-  save(probabilities,
-       file = paste('output/probabilities_', n_sims, '.Rdata', sep = ''))
-
   # make prettier object
   probabilities_pretty <- probabilities %>%
     tidyr::pivot_wider(names_from = 'Fathers_Observed',
                        values_from = 'Probability') %>%
-    dplyr::rename('1 Observed Father' = `1`,
-                  '2 Observed Fathers' = `2`,
-                  '3 Observed Fathers' = `3`,
-                  '4 Observed Fathers' = `4`,
-                  '5 Observed Fathers' = `5`) %>%
-    dplyr::arrange(Paternal_Contribution_Mode, Sample_Size, Fathers_Actual)
-
-  # save prettier object
-  save(probabilities_pretty,
-       file = paste('output/probabilities_pretty_', n_sims, '.Rdata', sep = ''))
+    dplyr::rename('1 Observed Father' = "1",
+                  '2 Observed Fathers' = "2",
+                  '3 Observed Fathers' = "3",
+                  '4 Observed Fathers' = "4",
+                  '5 Observed Fathers' = "5") %>%
+    dplyr::arrange(across(1), across(3), across(2))
 
   # make output
   output <- list(probabilities, probabilities_pretty)
