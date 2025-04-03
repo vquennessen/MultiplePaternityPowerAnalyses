@@ -26,6 +26,11 @@
 #'    "Proportion Correct" (how many simulations correctly identified all
 #'    fathers), and "Marginal" (the marginal paternal contributions of the last
 #'    or least dominant father).
+#' @param scenario a character vector describing the distributions of Fprob and
+#'    Mprob values. Options include 'uniform_Fprob_no_Mprob',
+#'    'uniform_Fprob_uniform_Mprob', 'uniform_Fprob_Mprob',
+#'    'base_Fprob_no_Mprob', 'base_Fprob_uniform_Mprob',
+#'    'base_Fprob_base_Mprob'.
 #'
 #' @return returns a data frame with the proportion of simulations where all
 #'    fathers are identified given the average and standard deviation of the
@@ -56,7 +61,8 @@
 #'                    Mprob = c(1),
 #'                    clutches_mu = 4.95,
 #'                    clutches_sd = 2.09,
-#'                    prop_correct = proportion_correct_all)
+#'                    prop_correct = proportion_correct_all,
+#'                    scenario)
 
 clutches_to_sample <- function(n_sims = 10000,
                                pop_size = 100,
@@ -66,7 +72,8 @@ clutches_to_sample <- function(n_sims = 10000,
                                Mprob,
                                clutches_mu = 4.95,
                                clutches_sd = 2.09,
-                               prop_correct)
+                               prop_correct,
+                               scenario)
 
 {
 
@@ -96,6 +103,8 @@ clutches_to_sample <- function(n_sims = 10000,
   {stop('Proportion_correct in prop_correct must be a numeric value.')}
   if (!is.numeric(prop_correct[, 5]))
   {stop('Marginal in prop_correct must be a numeric value.')}
+  if (!is.character(scenario))
+  {stop('Scenario must be a character value.')}
 
   # acceptable values
   if (n_sims <= 0) {stop('n_sims must be greater than 0.')}
@@ -129,6 +138,13 @@ clutches_to_sample <- function(n_sims = 10000,
   {stop('prop_correct Marginal cannot be below zero.')}
   if (sum(prop_correct[, 5] > 1) > 0)
   {stop('prop_correct Marginal cannot be above 1.')}
+  if (!(scenario) %in% c('uniform_Fprob_no_Mprob',
+                         'uniform_Fprob_uniform_Mprob',
+                         'uniform_Fprob_Mprob',
+                         'base_Fprob_no_Mprob',
+                         'base_Fprob_uniform_Mprob',
+                         'base_Fprob_base_Mprob'))
+  {stop('scenario given not recognized.')}
 
   ##############################################################################
 
@@ -139,7 +155,7 @@ clutches_to_sample <- function(n_sims = 10000,
   maxMothers <- length(Mprob)
 
   # operational sex ratios
-  OSRs <- seq(from = 0.05, to = 0.5, by = 0.05)
+  OSRs <- seq(from = 0.05, to = 0.95, by = 0.05)
   nOSR <- length(OSRs)
 
   # proportion of clutches sampled
