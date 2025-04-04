@@ -338,7 +338,7 @@ clutches_to_sample <- function(n_sims = 10000,
         if (i/n_sims*100 %% 10 == 0) {
           update1 <- paste(Sys.time(), ' - ', scenario, ' - sample size ',
                           sample_size, ' - ', paternal_contribution_mode, ' - ',
-                          n_sims, ' sims - ', n_sims/i*100, '% done!', sep = '')
+                          n_sims, ' sims - ', i/n_sims*100, '% done!', sep = '')
 
           write(update1, file = 'progress.txt', append = TRUE)
 
