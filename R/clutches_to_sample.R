@@ -335,8 +335,8 @@ clutches_to_sample <- function(n_sims = 10000,
 
         # print progress while running
         if ((n_sims/i) %% 10 == 0) {
-          paste(Sys.time(), ' - sample size ', sample_size, ' - ',
-                paternal_contribution_mode, ' - ', n_sims, ' sims - ',
+          paste(Sys.time(), ' - ', scenario, ' - sample size ', sample_size,
+                ' - ', paternal_contribution_mode, ' - ', n_sims, ' sims - ',
                 n_sims/i*100, '% done!', sep = '')
 
         }
