@@ -42,6 +42,7 @@
 #'
 #' @import dplyr
 #' @import magrittr
+#' @import stats
 #'
 #' @examples
 #' output <- hatchlings_to_sample(hatchlings_mu = 100.58,
@@ -170,9 +171,9 @@ clutches_to_sample <- function(n_sims = 10000,
   # for each OSR population
   for (osr in 1:nOSR) {
 
-    # make population of fathers and mothers
-    nF <- pop_size*OSRs[osr]
-    nM <- pop_size - nF
+    # make population of Fathers and Mothers
+    nF <- as.integer(pop_size*OSRs[osr])
+    nM <- as.integer(pop_size - nF)
 
     # for each proportion of clutches sampled
     for (pc in 1:nPC) {
@@ -182,7 +183,7 @@ clutches_to_sample <- function(n_sims = 10000,
 
       # initialize number of clutches based on number of mothers and population
       # parameters
-      nClutches <- matrix(round(stats::rnorm(n = nM*n_sims,
+      nClutches <- matrix(round(stats::rnorm(n = nM*n_sims,                       
                                              mean = clutches_mu,
                                              sd = clutches_sd)),
                           nrow = nM,
@@ -334,7 +335,7 @@ clutches_to_sample <- function(n_sims = 10000,
         )
 
         # print progress while running
-        if ((n_sims/i) %% 10 == 0) {
+        if (i/n_sims*100 %% 10 == 0) {
           paste(Sys.time(), ' - ', scenario, ' - sample size ', sample_size,
                 ' - ', paternal_contribution_mode, ' - ', n_sims, ' sims - ',
                 n_sims/i*100, '% done!', sep = '')
