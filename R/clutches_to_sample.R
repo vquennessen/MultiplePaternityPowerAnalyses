@@ -104,8 +104,8 @@ clutches_to_sample <- function(n_sims = 10000,
   {stop('Proportion_correct in prop_correct must be a numeric value.')}
   if (!is.numeric(prop_correct[, 5]))
   {stop('Marginal in prop_correct must be a numeric value.')}
-  if (!is.character(scenario))
-  {stop('Scenario must be a character value.')}
+  if (!is.character(scenario) & !is.factor(scenario))
+  {stop('scenario must be a character or factor value.')}
 
   # acceptable values
   if (n_sims <= 0) {stop('n_sims must be greater than 0.')}
