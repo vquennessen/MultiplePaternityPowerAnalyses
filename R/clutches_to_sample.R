@@ -183,7 +183,7 @@ clutches_to_sample <- function(n_sims = 10000,
 
       # initialize number of clutches based on number of mothers and population
       # parameters
-      nClutches <- matrix(round(stats::rnorm(n = nM*n_sims,                       
+      nClutches <- matrix(round(stats::rnorm(n = nM*n_sims,
                                              mean = clutches_mu,
                                              sd = clutches_sd)),
                           nrow = nM,
@@ -336,9 +336,11 @@ clutches_to_sample <- function(n_sims = 10000,
 
         # print progress while running
         if (i/n_sims*100 %% 10 == 0) {
-          paste(Sys.time(), ' - ', scenario, ' - sample size ', sample_size,
-                ' - ', paternal_contribution_mode, ' - ', n_sims, ' sims - ',
-                n_sims/i*100, '% done!', sep = '')
+          update1 <- paste(Sys.time(), ' - ', scenario, ' - sample size ',
+                          sample_size, ' - ', paternal_contribution_mode, ' - ',
+                          n_sims, ' sims - ', n_sims/i*100, '% done!', sep = '')
+
+          write(update1, file = 'progress.txt', append = TRUE)
 
         }
 
@@ -346,8 +348,6 @@ clutches_to_sample <- function(n_sims = 10000,
 
       # calculate index
       index <- (osr - 1)*nPC + pc
-
-
 
       # proportion of simulations where all fathers were identified
       all_fathers_ID <- mean(ID, na.rm = TRUE)
