@@ -43,6 +43,7 @@
 #' @import dplyr
 #' @import magrittr
 #' @import stats
+#' @import lubridate
 #'
 #' @examples
 #' output <- hatchlings_to_sample(hatchlings_mu = 100.58,
@@ -350,7 +351,7 @@ clutches_to_sample <- function(n_sims = 10000,
     }
 
     # print progress while running
-    update1 <- paste(Sys.time(), ' - ', scenario, ' - sample size ',
+    update1 <- paste(lubridate::now(), ' - ', scenario, ' - sample size ',
                      sample_size, ' - ', paternal_contribution_mode, ' - ',
                      n_sims, ' sims - OSR ', OSRs[osr], ' - PC ',
                      propClutches[nPC], ' done!', sep = '')
