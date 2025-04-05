@@ -139,12 +139,12 @@ clutches_to_sample <- function(n_sims = 10000,
   {stop('prop_correct Marginal cannot be below zero.')}
   if (sum(prop_correct[, 5] > 1) > 0)
   {stop('prop_correct Marginal cannot be above 1.')}
-  if (!(scenario) %in% c('uniform_Fprob_no_Mprob',
-                         'uniform_Fprob_uniform_Mprob',
-                         'uniform_Fprob_Mprob',
-                         'base_Fprob_no_Mprob',
-                         'base_Fprob_uniform_Mprob',
-                         'base_Fprob_base_Mprob'))
+  if (!(scenario) %in% c('uniform_F_no_M',
+                         'uniform_F_uniform_M',
+                         'uniform_F_base_M',
+                         'base_F_no_M',
+                         'base_F_uniform_M',
+                         'base_F_base_M'))
   {stop('scenario given not recognized.')}
 
   ##############################################################################
