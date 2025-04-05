@@ -352,7 +352,8 @@ clutches_to_sample <- function(n_sims = 10000,
     # print progress while running
     update1 <- paste(Sys.time(), ' - ', scenario, ' - sample size ',
                      sample_size, ' - ', paternal_contribution_mode, ' - ',
-                     n_sims, ' sims - OSR ', OSRs[osr], ' done!', sep = '')
+                     n_sims, ' sims - OSR ', OSRs[osr], ' - PC ',
+                     propClutches[nPC], ' done!', sep = '')
 
     write(update1, file = 'progress.txt', append = TRUE)
 
