@@ -334,15 +334,7 @@ clutches_to_sample <- function(n_sims = 10000,
           dplyr::n_distinct(identified_fathers) == as.integer(num_fathers), 1, 0
         )
 
-        # print progress while running
-        if ((i/n_sims*100) %% 10 == 0) {
-          update1 <- paste(Sys.time(), ' - ', scenario, ' - sample size ',
-                          sample_size, ' - ', paternal_contribution_mode, ' - ',
-                          n_sims, ' sims - ', i/n_sims*100, '% done!', sep = '')
 
-          write(update1, file = 'progress.txt', append = TRUE)
-
-        }
 
       }
 
@@ -356,6 +348,13 @@ clutches_to_sample <- function(n_sims = 10000,
       DF2$Proportion[index] <- all_fathers_ID
 
     }
+
+            # print progress while running
+          update1 <- paste(Sys.time(), ' - ', scenario, ' - sample size ',
+                          sample_size, ' - ', paternal_contribution_mode, ' - ',
+                          n_sims, ' sims - OSR ', OSRs[osr], ' done!', sep = '')
+
+          write(update1, file = 'progress.txt', append = TRUE)
 
   }
 
