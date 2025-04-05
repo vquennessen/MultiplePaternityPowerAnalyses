@@ -348,13 +348,13 @@ clutches_to_sample <- function(n_sims = 10000,
       # add ID to dataframe
       DF2$Proportion[index] <- all_fathers_ID
 
-    # print progress while running
-    update1 <- paste(lubridate::now(), ' - ', scenario, ' - sample size ',
-                     sample_size, ' - ', paternal_contribution_mode, ' - ',
-                     n_sims, ' sims - OSR ', OSRs[osr], ' - PC ',
-                     prop, ' done!', sep = '')
+      # print progress while running
+      update1 <- paste(lubridate::now(), ' - ', scenario, ' - sample size ',
+                       sample_size, ' - ', paternal_contribution_mode, ' - ',
+                       n_sims, ' sims - OSR ', OSRs[osr], ' - PC ',
+                       propClutches[pc], ' - done!', sep = '')
 
-    write(update1, file = 'progress.txt', append = TRUE)
+      write(update1, file = 'progress.txt', append = TRUE)
 
     }
 
