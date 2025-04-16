@@ -27,10 +27,8 @@
 #'    fathers), and "Marginal" (the marginal paternal contributions of the last
 #'    or least dominant father).
 #' @param scenario a character vector describing the distributions of Fprob and
-#'    Mprob values. Options include 'uniform_Fprob_no_Mprob',
-#'    'uniform_Fprob_uniform_Mprob', 'uniform_Fprob_Mprob',
-#'    'base_Fprob_no_Mprob', 'base_Fprob_uniform_Mprob',
-#'    'base_Fprob_base_Mprob'.
+#'    Mprob values. Options include 'uniform_F_no_M', 'uniform_F_uniform_M',
+#'    'uniform_F_base_M', 'base_F_no_M', 'base_F_uniform_M', 'base_F_base_M'.
 #'
 #' @return returns a data frame with the proportion of simulations where all
 #'    fathers are identified given the average and standard deviation of the
