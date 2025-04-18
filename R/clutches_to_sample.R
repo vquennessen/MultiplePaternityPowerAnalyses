@@ -272,7 +272,7 @@ clutches_to_sample <- function(n_sims = 10000,
             } else {
 
               # how many fathers were identified in each clutch for this mother?
-              nF_id <- sample(sub$Fathers,
+              nF_id <- sample(sub$Fathers_Observed,
                               size = nC_m,
                               prob = sub$Proportion_Correct,
                               replace = TRUE)
