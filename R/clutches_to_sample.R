@@ -21,11 +21,13 @@
 #'    lays in one nesting season. Default value is 4.95.
 #' @param clutches_sd a numeric value, the standard deviation of the number of
 #'    clutches a mother lays in one nesting season. Default value is 2.09.
-#' @param prop_correct a data frame with columns "Paternal Contribution Mode",
-#'    "Fathers" (number of contributing fathers), "Sample Size" (1 - 96),
-#'    "Proportion Correct" (how many simulations correctly identified all
-#'    fathers), and "Marginal" (the marginal paternal contributions of the last
-#'    or least dominant father).
+#' @param probs_id a data frame with columns
+#'    "Paternal Contribution Mode",
+#'    "Fathers_Actual" (number of contributing fathers),
+#'    "Sample Size" (1 - 96),
+#'    "Fathers_Observed" (number of contributing fathers observed), and
+#'    "Probability" (the probability of identifying Fathers_Observed given
+#'    Fathers_Actual).
 #' @param scenario a character vector describing the distributions of Fprob and
 #'    Mprob values. Options include 'uniform_F_no_M', 'uniform_F_uniform_M',
 #'    'uniform_F_base_M', 'base_F_no_M', 'base_F_uniform_M', 'base_F_base_M'.
@@ -44,14 +46,15 @@
 #' @import lubridate
 #'
 #' @examples
-#' output <- hatchlings_to_sample(hatchlings_mu = 100.58,
-#'                                hatchlings_sd = 22.61,
-#'                                max_fathers = 5,
-#'                                n_sims = 100,
-#'                                sample_sizes = c(32, 96),
-#'                                paternal_contribution_mode = 'random')
-#'
-#' proportion_correct_all <- output[[2]]
+#' probabilities_id_fathers <- probability_id_fathers(
+#'                                         hatchlings_mu = 100.58,
+#'                                         hatchlings_sd = 22.61,
+#'                                         max_fathers = 5,
+#'                                         n_sims = 1e+07,
+#'                                         sample_sizes = sample_sizes,
+#'                                         paternal_contribution_modes =
+#'                                           paternal_contribution_modes,
+#'                                         min_clutch_size = 10)[[1]]
 #'
 #' clutches_to_sample(n_sims = 100,
 #'                    pop_size = 100,
@@ -61,7 +64,7 @@
 #'                    Mprob = c(1),
 #'                    clutches_mu = 4.95,
 #'                    clutches_sd = 2.09,
-#'                    prop_correct = proportion_correct_all,
+#'                    probs_id = probabilities_id_fathers,
 #'                    scenario)
 
 clutches_to_sample <- function(n_sims = 10000,
@@ -72,7 +75,7 @@ clutches_to_sample <- function(n_sims = 10000,
                                Mprob,
                                clutches_mu = 4.95,
                                clutches_sd = 2.09,
-                               prop_correct,
+                               probs_id,
                                scenario)
 
 {
@@ -91,18 +94,18 @@ clutches_to_sample <- function(n_sims = 10000,
   if (!is.numeric(Mprob)) {stop('Mprob must be a numeric value.')}
   if (!is.numeric(clutches_mu)) {stop('clutches_mu must be a numeric value.')}
   if (!is.numeric(clutches_sd)) {stop('clutches_sd must be a numeric value.')}
-  if (!is.data.frame(prop_correct)) {stop('prop_correct must be a data frame.')}
-  if (!is.character(prop_correct[, 1]) & !is.factor(prop_correct[, 1]))
-  {stop('Paternal Contribution Mode in prop_correct must be a character or
+  if (!is.data.frame(probs_id)) {stop('probs_id must be a data frame.')}
+  if (!is.character(probs_id[, 1]) & !is.factor(probs_id[, 1]))
+  {stop('Paternal Contribution Mode in probs_id must be a character or
         factor value.')}
-  if (!is.numeric(prop_correct[, 2]))
-  {stop('Fathers in prop_correct must be a numeric value.')}
-  if (!is.numeric(prop_correct[, 3]) & !is.factor(prop_correct[, 3]))
-  {stop('Sample_Size in prop_correct must be a numeric or factor value.')}
-  if (!is.numeric(prop_correct[, 4]))
-  {stop('Proportion_correct in prop_correct must be a numeric value.')}
-  if (!is.numeric(prop_correct[, 5]))
-  {stop('Marginal in prop_correct must be a numeric value.')}
+  if (!is.numeric(probs_id[, 2]))
+  {stop('Fathers_Actual in probs_id must be a numeric value.')}
+  if (!is.numeric(probs_id[, 3]) & !is.factor(probs_id[, 3]))
+  {stop('Sample_Size in probs_id must be a numeric or factor value.')}
+  if (!is.numeric(probs_id[, 4]))
+  {stop('Fathers_Observed in probs_id must be a numeric value.')}
+  if (!is.numeric(probs_id[, 5]))
+  {stop('Probability in probs_id must be a numeric value.')}
   if (!is.character(scenario) & !is.factor(scenario))
   {stop('scenario must be a character or factor value.')}
 
@@ -121,23 +124,21 @@ clutches_to_sample <- function(n_sims = 10000,
   if (sum(Mprob > 1) > 0) {stop('Mprob values cannot be above 1.')}
   if (clutches_mu <= 0) {stop('clutches_mu must be greater than 0.')}
   if (clutches_sd <= 0) {stop('clutches_sd must be greater than 0.')}
-  if (sum(!(unique(prop_correct[, 1])) %in% c('random', 'exponential',
+  if (sum(!(unique(probs_id[, 1])) %in% c('random', 'exponential',
                                               'dominant50', 'dominant70',
                                               'dominant90',
                                               'mixed_dominant')) > 0)
-  {stop('paternal contribution mode(s) given in prop_correct not recognized.')}
-  if (sum(prop_correct[, 2] < 2) > 0)
-  {stop('prop_correct Fathers cannot be below 2.')}
-  if (sum(as.numeric(as.character(prop_correct[, 3])) < 0) > 0)
-  {stop('prop_correct Sample_Size cannot be below zero.')}
-  if (sum(prop_correct[, 4] < 0) > 0)
-  {stop('prop_correct Proportion_Correct cannot be below zero.')}
-  if (sum(prop_correct[, 4] > 1) > 0)
-  {stop('prop_correct Proportion_Correct cannot be above 1.')}
-  if (sum(prop_correct[, 5] < 0) > 0)
-  {stop('prop_correct Marginal cannot be below zero.')}
-  if (sum(prop_correct[, 5] > 1) > 0)
-  {stop('prop_correct Marginal cannot be above 1.')}
+  {stop('paternal contribution mode(s) given in probs_id not recognized.')}
+  if (sum(probs_id[, 2] < 1) > 0)
+  {stop('probs_id Fathers_Actual cannot be below 1.')}
+  if (sum(as.numeric(as.character(probs_id[, 3])) < 0) > 0)
+  {stop('probs_id Sample_Size cannot be below zero.')}
+  if (sum(probs_id[, 4] < 0) > 0)
+  {stop('probs_id Fathers_Observed cannot be below zero.')}
+  if (sum(probs_id[, 5] < 0) > 0)
+  {stop('probs_id Probability cannot be below zero.')}
+  if (sum(probs_id[, 5] > 1) > 0)
+  {stop('probs_id Probability cannot be above 1.')}
   if (!(scenario) %in% c('uniform_F_no_M',
                          'uniform_F_uniform_M',
                          'uniform_F_base_M',
@@ -258,8 +259,8 @@ clutches_to_sample <- function(n_sims = 10000,
           } else {
 
             # probability of identification of all possible fathers for this
-            # mother, pulled from prop_correct data frame given
-            sub <- prop_correct %>%
+            # mother, pulled from probs_id data frame given
+            sub <- probs_id %>%
               dplyr::filter(across(2) == nF_m,
                             across(4) > 0)
 
