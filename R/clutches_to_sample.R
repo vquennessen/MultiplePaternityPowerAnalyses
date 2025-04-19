@@ -125,9 +125,9 @@ clutches_to_sample <- function(n_sims = 10000,
   if (clutches_mu <= 0) {stop('clutches_mu must be greater than 0.')}
   if (clutches_sd <= 0) {stop('clutches_sd must be greater than 0.')}
   if (sum(!(unique(probs_id[, 1])) %in% c('random', 'exponential',
-                                              'dominant50', 'dominant70',
-                                              'dominant90',
-                                              'mixed_dominant')) > 0)
+                                          'dominant50', 'dominant70',
+                                          'dominant90',
+                                          'mixed_dominant')) > 0)
   {stop('paternal contribution mode(s) given in probs_id not recognized.')}
   if (sum(probs_id[, 2] < 1) > 0)
   {stop('probs_id Fathers_Actual cannot be below 1.')}
@@ -222,14 +222,14 @@ clutches_to_sample <- function(n_sims = 10000,
         # for each mother
         for (m in 1:nM) {
 
+          # if there are no fathers left, stop the loop for the simulation
+          if (dplyr::n_distinct(stats::na.omit(BPf)) == 0) { break; break }
+
           # how many clutches for this mother
           nC_m <- nClutches[m, i]
 
           # how many fathers for this mother
           nF_m <- nFathers[m, i]
-
-          # if there are no fathers left, stop the loop for the simulation
-          if (dplyr::n_distinct(stats::na.omit(BPf)) == 0) { break; break }
 
           # if there are not enough unique fathers left in the breeding pool for
           # this mother
@@ -261,8 +261,10 @@ clutches_to_sample <- function(n_sims = 10000,
             # probability of identification of all possible fathers for this
             # mother, pulled from probs_id data frame given
             sub <- probs_id %>%
-              dplyr::filter(across(2) == nF_m,
-                            across(4) > 0)
+              dplyr::filter(Paternal_Contribution_Mode == paternal_contribution_mode,
+                            Fathers_Actual == nF_m,
+                            Sample_Size == sample_size,
+                            Probability > 0)
 
             # if total fathers are automatically identified for any clutch
             if (nrow(sub) == 1) {
@@ -277,25 +279,13 @@ clutches_to_sample <- function(n_sims = 10000,
                               prob = sub$Proportion_Correct,
                               replace = TRUE)
 
-              # if there's only 1 clutch
-              if (nC_m == 1) {
+              # if there are more than 1 clutch
+              for (n in 1:nC_m) {
 
-                # add the fathers identified from the clutch
+                # add the fathers identified from the clutches for this mother
                 clutches <- append(clutches, list(sample(fathers_m,
-                                                         size = nF_id,
-                                                         replace = TRUE)))
-
-              } else {
-
-                # if there are more than 1 clutch
-                for (n in 1:nC_m) {
-
-                  # add the fathers identified from the clutches for this mother
-                  clutches <- append(clutches, list(sample(fathers_m,
-                                                           size = nF_id[n],
-                                                           replace = FALSE)))
-
-                }
+                                                         size = nF_id[n],
+                                                         replace = FALSE)))
 
               }
 
