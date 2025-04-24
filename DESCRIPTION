@@ -1,6 +1,6 @@
 Package: MultiplePaternityPowerAnalyses
 Title: Power analyses to count breeding males in populations with multiple paternity
-Version: 1.4.0
+Version: 1.5.0
 Authors@R: 
     person("Vic", "Quennessen", 
         email = "viquennessen@gmail.com", 
