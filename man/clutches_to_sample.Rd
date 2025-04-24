@@ -13,7 +13,9 @@ clutches_to_sample(
   Mprob,
   clutches_mu = 4.95,
   clutches_sd = 2.09,
-  prop_correct
+  probs_id,
+  scenario,
+  minimum_id
 )
 }
 \arguments{
@@ -43,11 +45,20 @@ lays in one nesting season. Default value is 4.95.}
 \item{clutches_sd}{a numeric value, the standard deviation of the number of
 clutches a mother lays in one nesting season. Default value is 2.09.}
 
-\item{prop_correct}{a data frame with columns "Paternal Contribution Mode",
-"Fathers" (number of contributing fathers), "Sample Size" (1 - 96),
-"Proportion Correct" (how many simulations correctly identified all
-fathers), and "Marginal" (the marginal paternal contributions of the last
-or least dominant father).}
+\item{probs_id}{a data frame with columns
+"Paternal Contribution Mode",
+"Fathers_Actual" (number of contributing fathers),
+"Sample Size" (1 - 96),
+"Fathers_Observed" (number of contributing fathers observed), and
+"Probability" (the probability of identifying Fathers_Observed given
+Fathers_Actual).}
+
+\item{scenario}{a character vector describing the distributions of Fprob and
+Mprob values. Options include 'uniform_F_no_M', 'uniform_F_uniform_M',
+'uniform_F_base_M', 'base_F_no_M', 'base_F_uniform_M', 'base_F_base_M'.}
+
+\item{minimum_id}{a numeric value denoting the minimum acceptable
+proportion of fathers to ID to count as 'successful'. Default value is 1.}
 }
 \value{
 returns a data frame with the proportion of simulations where all
@@ -61,22 +72,25 @@ from clutches, and the paternal contribution mode.
 determine if all of the fathers that contributed were identified.
 }
 \examples{
-output <- hatchlings_to_sample(hatchlings_mu = 100.58,
-                               hatchlings_sd = 22.61,
-                               max_fathers = 5,
-                               n_sims = 100,
-                               sample_sizes = c(32, 96),
-                               paternal_contribution_mode = 'random')
-
-proportion_correct_all <- output[[2]]
+probabilities_id_fathers <- probability_id_fathers(
+                                        hatchlings_mu = 100.58,
+                                        hatchlings_sd = 22.61,
+                                        max_fathers = 5,
+                                        n_sims = 1e+04,
+                                        sample_sizes = c(32, 96),
+                                        paternal_contribution_modes =
+                                          'random',
+                                        min_clutch_size = 10)[[1]]
 
 clutches_to_sample(n_sims = 100,
-                pop_size = 100,
-                sample_size = 32,
-                paternal_contribution_mode = 'random',
-                Fprob = c(0.463, 0.318, 0.157, 0.034, 0.028),
-                Mprob = c(1),
-                clutches_mu = 4.95,
-                clutches_sd = 2.09,
-                prop_correct = proportion_correct_all)
+                   pop_size = 100,
+                   sample_size = 32,
+                   paternal_contribution_mode = 'random',
+                   Fprob = c(0.463, 0.318, 0.157, 0.034, 0.028),
+                   Mprob = c(1),
+                   clutches_mu = 4.95,
+                   clutches_sd = 2.09,
+                   probs_id = probabilities_id_fathers,
+                   scenario = 'uniform_F_uniform_M',
+                   minimum_id = 1)
 }

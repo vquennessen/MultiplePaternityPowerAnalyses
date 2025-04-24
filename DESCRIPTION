@@ -14,7 +14,7 @@ Description: This package quantifies the confidence in identifying all of the
     probability_id_fathers() must be run to produce output that is used as input 
     for conditional_probabilities(). 
 URL: https://github.com/vquennessen/MultiplePaternityPowerAnalyses
-Imports: tidyr, stats, dplyr, ggplot2, viridisLite, magrittr
+Imports: tidyr, stats, dplyr, ggplot2, viridisLite, magrittr, lubridate
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

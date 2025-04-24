@@ -31,6 +31,8 @@
 #' @param scenario a character vector describing the distributions of Fprob and
 #'    Mprob values. Options include 'uniform_F_no_M', 'uniform_F_uniform_M',
 #'    'uniform_F_base_M', 'base_F_no_M', 'base_F_uniform_M', 'base_F_base_M'.
+#' @param minimum_id a numeric value denoting the minimum acceptable
+#'    proportion of fathers to ID to count as 'successful'. Default value is 1.
 #'
 #' @return returns a data frame with the proportion of simulations where all
 #'    fathers are identified given the average and standard deviation of the
@@ -50,10 +52,10 @@
 #'                                         hatchlings_mu = 100.58,
 #'                                         hatchlings_sd = 22.61,
 #'                                         max_fathers = 5,
-#'                                         n_sims = 1e+07,
-#'                                         sample_sizes = sample_sizes,
+#'                                         n_sims = 1e+04,
+#'                                         sample_sizes = c(32, 96),
 #'                                         paternal_contribution_modes =
-#'                                           paternal_contribution_modes,
+#'                                           'random',
 #'                                         min_clutch_size = 10)[[1]]
 #'
 #' clutches_to_sample(n_sims = 100,
@@ -65,7 +67,8 @@
 #'                    clutches_mu = 4.95,
 #'                    clutches_sd = 2.09,
 #'                    probs_id = probabilities_id_fathers,
-#'                    scenario)
+#'                    scenario = 'uniform_F_uniform_M',
+#'                    minimum_id = 1)
 
 clutches_to_sample <- function(n_sims = 10000,
                                pop_size = 100,
@@ -76,7 +79,8 @@ clutches_to_sample <- function(n_sims = 10000,
                                clutches_mu = 4.95,
                                clutches_sd = 2.09,
                                probs_id,
-                               scenario)
+                               scenario,
+                               minimum_id)
 
 {
 
@@ -108,6 +112,8 @@ clutches_to_sample <- function(n_sims = 10000,
   {stop('Probability in probs_id must be a numeric value.')}
   if (!is.character(scenario) & !is.factor(scenario))
   {stop('scenario must be a character or factor value.')}
+  if (!is.numeric(minimum_id))
+  {stop('minimum_id must be a numeric value.')}
 
   # acceptable values
   if (n_sims <= 0) {stop('n_sims must be greater than 0.')}
@@ -118,9 +124,9 @@ clutches_to_sample <- function(n_sims = 10000,
                                            'dominant50', 'dominant70',
                                            'dominant90', 'mixed_dominant'))
   {stop('paternal contribution mode(s) given not recognized.')}
-  if (sum(Fprob < 0) > 0) {stop('Fprob values cannot be below zero.')}
+  if (sum(Fprob < 0) > 0) {stop('Fprob values cannot be below 0.')}
   if (sum(Fprob > 1) > 0) {stop('Fprob values cannot be above 1.')}
-  if (sum(Mprob < 0) > 0) {stop('Mprob values cannot be below zero.')}
+  if (sum(Mprob < 0) > 0) {stop('Mprob values cannot be below 0.')}
   if (sum(Mprob > 1) > 0) {stop('Mprob values cannot be above 1.')}
   if (clutches_mu <= 0) {stop('clutches_mu must be greater than 0.')}
   if (clutches_sd <= 0) {stop('clutches_sd must be greater than 0.')}
@@ -132,11 +138,11 @@ clutches_to_sample <- function(n_sims = 10000,
   if (sum(probs_id[, 2] < 1) > 0)
   {stop('probs_id Fathers_Actual cannot be below 1.')}
   if (sum(as.numeric(as.character(probs_id[, 3])) < 0) > 0)
-  {stop('probs_id Sample_Size cannot be below zero.')}
+  {stop('probs_id Sample_Size cannot be below 0.')}
   if (sum(probs_id[, 4] < 0) > 0)
-  {stop('probs_id Fathers_Observed cannot be below zero.')}
+  {stop('probs_id Fathers_Observed cannot be below 0.')}
   if (sum(probs_id[, 5] < 0) > 0)
-  {stop('probs_id Probability cannot be below zero.')}
+  {stop('probs_id Probability cannot be below 0.')}
   if (sum(probs_id[, 5] > 1) > 0)
   {stop('probs_id Probability cannot be above 1.')}
   if (!(scenario) %in% c('uniform_F_no_M',
@@ -146,6 +152,8 @@ clutches_to_sample <- function(n_sims = 10000,
                          'base_F_uniform_M',
                          'base_F_base_M'))
   {stop('scenario given not recognized.')}
+  if (minimum_id < 0) {stop('minimum_id cannot be below 0.')}
+  if (minimum_id > 1) {stop('minimum_id cannot be above 1.')}
 
   ##############################################################################
 
@@ -162,6 +170,13 @@ clutches_to_sample <- function(n_sims = 10000,
   # proportion of clutches sampled
   propClutches <- seq(from = 0.05, to = 1, by = 0.05)
   nPC <- length(propClutches)
+
+  # column names for probs_id
+  Paternal_Contribution_Mode <- names(probs_id)[1]
+  Fathers_Actual             <- names(probs_id)[2]
+  Sample_Size                <- names(probs_id)[3]
+  Fathers_Observed           <- names(probs_id)[4]
+  Probability                <- names(probs_id)[5]
 
   # pre-allocate data frame for results
   DF2 <- data.frame(OSR = rep(OSRs, each = nPC),
@@ -302,6 +317,9 @@ clutches_to_sample <- function(n_sims = 10000,
         # population in this simulation
         num_fathers <- dplyr::n_distinct(unlist(clutches))
 
+        # how many fathers represent the minimum required proportion?
+        min_fathers <- minimum_id * as.integer(num_fathers)
+
         # number of clutches total
         num_clutches <- length(clutches)
 
@@ -319,12 +337,10 @@ clutches_to_sample <- function(n_sims = 10000,
         # WHICH fathers were identified, add to identified fathers vector
         identified_fathers <- unlist(clutches[indices])
 
-        # were all fathers identified?
+        # were the minimum required proportion of fathers identified?
         ID[i] <- ifelse(
-          dplyr::n_distinct(identified_fathers) == as.integer(num_fathers), 1, 0
+          (dplyr::n_distinct(identified_fathers) >= min_fathers), 1, 0
         )
-
-
 
       }
 
@@ -338,10 +354,11 @@ clutches_to_sample <- function(n_sims = 10000,
       DF2$Proportion[index] <- all_fathers_ID
 
       # print progress while running
-      update1 <- paste(lubridate::now(), ' - ', scenario, ' - sample size ',
-                       sample_size, ' - ', paternal_contribution_mode, ' - ',
-                       n_sims, ' sims - OSR ', OSRs[osr], ' - PC ',
-                       propClutches[pc], ' - done!', sep = '')
+      update1 <- paste(lubridate::now(), ' - ', scenario, '- N', pop_size,
+                       ' - sample size ', sample_size, ' - ',
+                       paternal_contribution_mode, ' - ', n_sims,
+                       ' sims - OSR ', OSRs[osr], ' - PC ', propClutches[pc],
+                       ' - done!', sep = '')
 
       write(update1, file = 'progress.txt', append = TRUE)
 
